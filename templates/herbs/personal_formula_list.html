@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+
+{% block title %}My Formulas{% endblock %}
+
+{% block content %}
+<section class="search-panel">
+  <div class="page-actions">
+    <div>
+      <h1>My formulas</h1>
+      <p class="intro">Record formulas being used by you or your family, then compare their ingredient qualities with locally grown plants.</p>
+    </div>
+    <a class="button-link" href="{% url 'personal-formula-create' %}">Add formula</a>
+  </div>
+</section>
+
+<section class="results">
+  <div class="herb-grid">
+    {% for formula in formulas %}
+      <article class="herb-card formula-card">
+        <div>
+          <p class="eyebrow">{{ formula.for_whom|default:"Personal formula" }}</p>
+          <h3><a href="{{ formula.get_absolute_url }}">{{ formula.name }}</a></h3>
+          {% if formula.source_formula %}
+            <p class="names">Based on {{ formula.source_formula.pinyin_display|default:formula.source_formula.pinyin_name }}</p>
+          {% endif %}
+        </div>
+        {% if formula.notes %}
+          <p>{{ formula.notes|truncatewords:32 }}</p>
+        {% else %}
+          <p class="names">No notes recorded yet.</p>
+        {% endif %}
+        <p class="grow-status">{{ formula.ingredients.count }} ingredient{{ formula.ingredients.count|pluralize }}</p>
+      </article>
+    {% empty %}
+      <p class="empty">No personal formulas recorded yet.</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

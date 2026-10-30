@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}Sign Up{% endblock %}
+
+{% block content %}
+<section class="detail auth-panel">
+  <h1>Sign up</h1>
+  <form method="post" class="stacked-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    {% for field in form %}
+      <label>
+        <span>{{ field.label }}</span>
+        {{ field }}
+        {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
+        {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+      </label>
+    {% endfor %}
+    <button type="submit">Create account</button>
+  </form>
+  <p class="form-note">Already have an account? <a href="{% url 'login' %}">Log in</a>.</p>
+</section>
+{% endblock %}

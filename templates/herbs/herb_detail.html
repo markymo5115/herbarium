@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+
+{% block title %}{{ herb.pinyin_name }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+  {% if herb.item_type == "vegetable" or herb.item_type == "fruit" %}
+    <a class="back-link" href="{% url 'food-list' %}">Back to foods</a>
+  {% elif herb.item_type == "local_plant" %}
+    <a class="back-link" href="{% url 'local-plant-list' %}">Back to local plants</a>
+  {% else %}
+    <a class="back-link" href="{% url 'herb-list' %}">Back to search</a>
+  {% endif %}
+  <p class="eyebrow">{{ herb.category.name }}</p>
+  <h1>{{ herb.traditional_chinese_name|default:herb.english_name }}{% if herb.simplified_chinese_name and herb.simplified_chinese_name != herb.traditional_chinese_name %} ({{ herb.simplified_chinese_name }}){% endif %}</h1>
+  {% if herb.traditional_chinese_name or herb.pinyin_display and herb.pinyin_display != herb.english_name or herb.pinyin_name != herb.english_name %}
+    <p class="pinyin large">{{ herb.pinyin_display|default:herb.pinyin_name }}</p>
+  {% endif %}
+  <p class="subtitle">{{ herb.english_name }}</p>
+
+  {% if herb.plant_image_url or herb.prepared_image_url %}
+    <div class="image-pair">
+      {% if herb.plant_image_url %}
+        <figure>
+          <img src="{{ herb.plant_image_url }}" alt="{{ herb.plant_image_caption|default:herb.english_name }}">
+          <figcaption>
+            {{ herb.plant_image_caption|default:"Growing plant" }}
+            {% if herb.plant_image_source_url %}
+              <a href="{{ herb.plant_image_source_url }}">Source</a>
+            {% endif %}
+          </figcaption>
+        </figure>
+      {% endif %}
+      {% if herb.prepared_image_url %}
+        <figure>
+          <img src="{{ herb.prepared_image_url }}" alt="{{ herb.prepared_image_caption|default:herb.english_name }}">
+          <figcaption>
+            {{ herb.prepared_image_caption|default:"Prepared herb" }}
+            {% if herb.prepared_image_source_url %}
+              <a href="{{ herb.prepared_image_source_url }}">Source</a>
+            {% endif %}
+          </figcaption>
+        </figure>
+      {% endif %}
+    </div>
+  {% endif %}
+
+  <dl class="facts">
+    <div><dt>Type</dt><dd>{{ herb.get_item_type_display }}</dd></div>
+    <div><dt>Latin name</dt><dd>{{ herb.latin_name|default:"Not recorded" }}</dd></div>
+    {% if herb.plant_part %}
+      <div><dt>Part used</dt><dd>{{ herb.plant_part }}</dd></div>
+    {% endif %}
+    {% if herb.preparation %}
+      <div><dt>Preparation</dt><dd>{{ herb.preparation }}</dd></div>
+    {% endif %}
+    <div><dt>Nature</dt><dd>{{ herb.get_nature_display|default:"Not recorded" }}</dd></div>
+    <div><dt>Flavors</dt><dd>{{ herb.flavors|default:"Not recorded" }}</dd></div>
+    <div><dt>Meridians</dt><dd>{{ herb.meridians|default:"Not recorded" }}</dd></div>
+    <div><dt>UK growing</dt><dd>{{ herb.get_uk_growing_display }}</dd></div>
+    {% if herb.is_local_uk_plant %}
+      <div><dt>Local plant</dt><dd>Common UK weed, wild plant, or easy garden plant</dd></div>
+    {% endif %}
+    {% if herb.local_habitat %}
+      <div><dt>Habitat</dt><dd>{{ herb.local_habitat }}</dd></div>
+    {% endif %}
+  </dl>
+
+  <section>
+    {% if herb.item_type == "vegetable" or herb.item_type == "fruit" %}
+      <h2>Food therapy notes</h2>
+    {% else %}
+      <h2>Traditionally used for</h2>
+    {% endif %}
+    <div class="tags large">
+      {% for ailment in herb.ailments.all %}
+        <span>{{ ailment.name }}</span>
+      {% empty %}
+        <span>No ailments recorded</span>
+      {% endfor %}
+    </div>
+    <p>{{ herb.traditional_uses }}</p>
+  </section>
+
+  {% if herb.safety_notes %}
+    <section class="safety">
+      <h2>Safety notes</h2>
+      <p>{{ herb.safety_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if herb.uk_growing_notes %}
+    <section>
+      <h2>Growing in the United Kingdom</h2>
+      <p>{{ herb.uk_growing_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if herb.substitution_notes %}
+    <section>
+      {% if herb.item_type == "vegetable" or herb.item_type == "fruit" %}
+        <h2>Dietary comparison notes</h2>
+      {% else %}
+        <h2>Local substitution notes</h2>
+      {% endif %}
+      <p>{{ herb.substitution_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if herb.classification_notes %}
+    <section>
+      <h2>Classification notes</h2>
+      <p>{{ herb.classification_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if herb.source_note %}
+    <section>
+      <h2>Source note</h2>
+      <p>{{ herb.source_note }}</p>
+    </section>
+  {% endif %}
+</article>
+{% endblock %}

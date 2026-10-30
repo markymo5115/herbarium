@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page_title|default:"UK Local Plants" }}{% endblock %}
+
+{% block content %}
+<section class="search-panel">
+  <h1>{{ page_title|default:"UK local plants" }}</h1>
+  <p class="intro">{{ page_intro|default:"Common UK weeds and garden plants mapped onto the same TCM-style categories as the formula herbs, for researching local substitution candidates." }}</p>
+  <form method="get" class="search-form local-search-form">
+    <label>
+      <span>Keyword</span>
+      <input name="q" value="{{ query }}" placeholder="Name, action, habitat, meridian...">
+    </label>
+    <label>
+      <span>Category</span>
+      <select name="category">
+        <option value="">All categories</option>
+        {% for category in categories %}
+          <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Nature</span>
+      <select name="nature">
+        <option value="">All natures</option>
+        {% for value, label in nature_choices %}
+          <option value="{{ value }}" {% if selected_nature == value %}selected{% endif %}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Organ network</span>
+      <select name="meridian">
+        <option value="">All networks</option>
+        {% for meridian in meridian_choices %}
+          <option value="{{ meridian }}" {% if selected_meridian == meridian %}selected{% endif %}>{{ meridian }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <label>
+      <span>Ailment</span>
+      <select name="ailment">
+        <option value="">All ailments</option>
+        {% for ailment in ailments %}
+          <option value="{{ ailment.id }}" {% if selected_ailment == ailment.id|stringformat:"s" %}selected{% endif %}>{{ ailment.name }}</option>
+        {% endfor %}
+      </select>
+    </label>
+    <button type="submit">Search</button>
+  </form>
+</section>
+
+<section class="results">
+  <div class="results-heading">
+    <h2>{{ herbs|length }} {{ result_label|default:"local plant" }}{{ herbs|length|pluralize }}</h2>
+  </div>
+  <div class="herb-grid">
+    {% for herb in herbs %}
+      <article class="herb-card local-plant-card">
+        <a class="card-image-link" href="{{ herb.get_absolute_url }}" aria-label="View {{ herb.english_name }}">
+          {% if herb.plant_image_url %}
+            <img class="card-image" src="{{ herb.plant_image_url }}" alt="{{ herb.plant_image_caption|default:herb.english_name }}">
+          {% elif herb.prepared_image_url %}
+            <img class="card-image" src="{{ herb.prepared_image_url }}" alt="{{ herb.prepared_image_caption|default:herb.english_name }}">
+          {% else %}
+            <span class="card-image placeholder">No image yet</span>
+          {% endif %}
+        </a>
+        <div>
+          <p class="eyebrow">{{ herb.category.name }}</p>
+          <h3><a href="{{ herb.get_absolute_url }}">{{ herb.english_name }}</a></h3>
+          {% if herb.latin_name %}
+            <p class="names"><em>{{ herb.latin_name }}</em></p>
+          {% endif %}
+          {% if herb.traditional_chinese_name or herb.pinyin_display and herb.pinyin_display != herb.english_name or herb.pinyin_name != herb.english_name %}
+            <p class="pinyin">{{ herb.pinyin_display|default:herb.pinyin_name }}{% if herb.traditional_chinese_name %} · {{ herb.traditional_chinese_name }}{% if herb.simplified_chinese_name and herb.simplified_chinese_name != herb.traditional_chinese_name %} ({{ herb.simplified_chinese_name }}){% endif %}{% endif %}</p>
+          {% endif %}
+          {% if herb.plant_part or herb.preparation %}
+            <p class="names">
+              {% if herb.plant_part %}{{ herb.plant_part }}{% endif %}{% if herb.plant_part and herb.preparation %}, {% endif %}{% if herb.preparation %}{{ herb.preparation }}{% endif %}
+            </p>
+          {% endif %}
+          {% if herb.local_habitat %}
+            <p class="grow-status">{{ herb.local_habitat }}</p>
+          {% endif %}
+        </div>
+        <dl class="mini-facts card-facts">
+          <div><dt>Nature</dt><dd>{{ herb.get_nature_display|default:"Not recorded" }}</dd></div>
+          <div><dt>Flavours</dt><dd>{{ herb.flavors|default:"Not recorded" }}</dd></div>
+          <div><dt>Networks</dt><dd>{{ herb.meridians|default:"Not recorded" }}</dd></div>
+        </dl>
+        <p>{{ herb.substitution_notes|default:herb.traditional_uses|truncatewords:42 }}</p>
+        <div class="tags">
+          {% for ailment in herb.ailments.all %}
+            <span>{{ ailment.name }}</span>
+          {% endfor %}
+        </div>
+      </article>
+    {% empty %}
+      <p class="empty">{{ empty_message|default:"No local plants match this search yet." }}</p>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}

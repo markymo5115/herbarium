@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block title %}{{ formula.name }}{% endblock %}
+
+{% block content %}
+<article class="detail wide-detail">
+  <div class="page-actions">
+    <div>
+      <a class="back-link" href="{% url 'personal-formula-list' %}">Back to my formulas</a>
+      <p class="eyebrow">{{ formula.for_whom|default:"Personal formula" }}</p>
+      <h1>{{ formula.name }}</h1>
+      {% if formula.source_formula %}
+        <p class="subtitle">Based on <a href="{{ formula.source_formula.get_absolute_url }}">{{ formula.source_formula.pinyin_display|default:formula.source_formula.pinyin_name }}</a></p>
+      {% endif %}
+    </div>
+    <a class="button-link" href="{% url 'personal-formula-edit' formula.pk %}">Edit</a>
+  </div>
+
+  {% if formula.notes %}
+    <section>
+      <h2>Notes</h2>
+      <p>{{ formula.notes }}</p>
+    </section>
+  {% endif %}
+
+  <section>
+    <h2>Approximate formula profile</h2>
+    <p>{{ profile.summary }}</p>
+    <div class="profile-grid">
+      <div>
+        <h3>Actions</h3>
+        <div class="tags">
+          {% for name, count in profile.categories %}
+            <span>{{ name }} ({{ count }})</span>
+          {% empty %}
+            <span>Not enough linked ingredients</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3>Organ networks</h3>
+        <div class="tags">
+          {% for name, count in profile.meridians %}
+            <span>{{ name }} ({{ count }})</span>
+          {% empty %}
+            <span>Not enough linked ingredients</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3>Natures</h3>
+        <div class="tags">
+          {% for name, count in profile.natures %}
+            <span>{{ name }} ({{ count }})</span>
+          {% empty %}
+            <span>Not enough linked ingredients</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3>Flavours</h3>
+        <div class="tags">
+          {% for name, count in profile.flavors %}
+            <span>{{ name }} ({{ count }})</span>
+          {% empty %}
+            <span>Not enough linked ingredients</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Ingredients and local alternatives</h2>
+    <div class="substitution-list">
+      {% for item in suggestions %}
+        <article class="substitution-row">
+          <div>
+            <p class="eyebrow">{{ item.ingredient.origin }}</p>
+            <h3>{{ item.ingredient.display_name }}</h3>
+            {% if item.ingredient.herb %}
+              <p class="names">{{ item.ingredient.herb.english_name }}</p>
+              <dl class="mini-facts">
+                <div><dt>Action</dt><dd>{{ item.ingredient.herb.category.name }}</dd></div>
+                <div><dt>Nature</dt><dd>{{ item.ingredient.herb.get_nature_display|default:"Not recorded" }}</dd></div>
+                <div><dt>Networks</dt><dd>{{ item.ingredient.herb.meridians|default:"Not recorded" }}</dd></div>
+              </dl>
+            {% else %}
+              <p class="names">Link this ingredient to a database herb to calculate local alternatives.</p>
+            {% endif %}
+            {% if item.ingredient.amount %}<p class="grow-status">Amount: {{ item.ingredient.amount }}</p>{% endif %}
+            {% if item.ingredient.notes %}<p>{{ item.ingredient.notes }}</p>{% endif %}
+          </div>
+          <div class="herb-grid alternative-herb-grid">
+            {% for alternative in item.alternatives %}
+              <article class="herb-card local-plant-card alternative-herb-card">
+                <a class="card-image-link" href="{{ alternative.herb.get_absolute_url }}" aria-label="View {{ alternative.herb.english_name }}">
+                  {% if alternative.herb.plant_image_url %}
+                    <img class="card-image" src="{{ alternative.herb.plant_image_url }}" alt="{{ alternative.herb.plant_image_caption|default:alternative.herb.english_name }}">
+                  {% elif alternative.herb.prepared_image_url %}
+                    <img class="card-image" src="{{ alternative.herb.prepared_image_url }}" alt="{{ alternative.herb.prepared_image_caption|default:alternative.herb.english_name }}">
+                  {% else %}
+                    <span class="card-image placeholder">No image yet</span>
+                  {% endif %}
+                </a>
+                <div>
+                  <p class="eyebrow">{{ alternative.herb.category.name }}</p>
+                  <h3><a href="{{ alternative.herb.get_absolute_url }}">{{ alternative.herb.english_name }}</a></h3>
+                  {% if alternative.herb.latin_name %}
+                    <p class="names"><em>{{ alternative.herb.latin_name }}</em></p>
+                  {% endif %}
+                </div>
+                <dl class="mini-facts card-facts">
+                  <div><dt>Nature</dt><dd>{{ alternative.herb.get_nature_display|default:"Not recorded" }}</dd></div>
+                  <div><dt>Flavours</dt><dd>{{ alternative.herb.flavors|default:"Not recorded" }}</dd></div>
+                  <div><dt>Networks</dt><dd>{{ alternative.herb.meridians|default:"Not recorded" }}</dd></div>
+                </dl>
+                <div class="tags">
+                  {% for reason in alternative.reasons %}
+                    <span>{{ reason }}</span>
+                  {% endfor %}
+                </div>
+              </article>
+            {% empty %}
+              <p class="empty">No local alternatives calculated yet.</p>
+            {% endfor %}
+          </div>
+        </article>
+      {% empty %}
+        <p class="empty">No ingredients recorded yet. Add ingredients or choose a source formula to generate alternatives.</p>
+      {% endfor %}
+    </div>
+  </section>
+</article>
+{% endblock %}

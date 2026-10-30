@@ -1,0 +1,29 @@
+digraph herbs_models {
+  graph [rankdir=LR, splines=true, overlap=false];
+  node [shape=record, style="rounded,filled", fillcolor="#f8fafc", color="#64748b", fontname="Arial"];
+  edge [color="#475569", fontname="Arial", fontsize=10];
+  HerbCategory [label="{HerbCategory|id\lname\ldescription\l}"];
+  Ailment [label="{Ailment|id\lname\lnotes\l}"];
+  Herb [label="{Herb|id\lenglish_name\litem_type\lpinyin_name\lpinyin_display\ltraditional_chinese_name\lsimplified_chinese_name\llatin_name\lplant_part\lpreparation\lclassification_notes\lcategory\lnature\lflavors\lmeridians\ltraditional_uses\lsafety_notes\lplant_image_url\lplant_image_caption\lplant_image_source_url\lprepared_image_url\lprepared_image_caption\lprepared_image_source_url\luk_growing\luk_growing_notes\lis_local_uk_plant\lis_british_herbalist_plant\llocal_habitat\lsubstitution_notes\lsource_note\l}"];
+  Formula [label="{Formula|id\lname\lenglish_translation\lpinyin_name\lpinyin_display\ltraditional_chinese_name\lsimplified_chinese_name\lcategory\ltraditional_uses\lcautions\lpreparation_notes\lsource_note\l}"];
+  FormulaIngredient [label="{FormulaIngredient|id\lformula\lherb\lrole\lnotes\lorder\l}"];
+  FoodRecipe [label="{FoodRecipe|id\lname\lchinese_name\lcategory\lnature\lflavors\lmeridians\ltraditional_uses\lcautions\lpreparation_notes\lsource_note\l}"];
+  FoodRecipeIngredient [label="{FoodRecipeIngredient|id\lrecipe\lherb\lname\lamount\lrole\lnotes\ltcm_importance\lorder\l}"];
+  FoodRecipeStep [label="{FoodRecipeStep|id\lrecipe\lorder\linstruction\l}"];
+  PersonalFormula [label="{PersonalFormula|id\luser\lname\lfor_whom\lsource_formula\lnotes\l}"];
+  PersonalFormulaIngredient [label="{PersonalFormulaIngredient|id\lpersonal_formula\lherb\lcustom_name\lamount\lnotes\lorder\l}"];
+  Herb -> HerbCategory [label="category\nforeign key"];
+  Herb -> Ailment [label="ailments\nmany-to-many"];
+  Formula -> Herb [label="herbs\nmany-to-many"];
+  Formula -> Ailment [label="ailments\nmany-to-many"];
+  FormulaIngredient -> Formula [label="formula\nforeign key"];
+  FormulaIngredient -> Herb [label="herb\nforeign key"];
+  FoodRecipe -> Herb [label="ingredients\nmany-to-many"];
+  FoodRecipe -> Ailment [label="ailments\nmany-to-many"];
+  FoodRecipeIngredient -> FoodRecipe [label="recipe\nforeign key"];
+  FoodRecipeIngredient -> Herb [label="herb\nforeign key"];
+  FoodRecipeStep -> FoodRecipe [label="recipe\nforeign key"];
+  PersonalFormula -> Formula [label="source_formula\nforeign key"];
+  PersonalFormulaIngredient -> PersonalFormula [label="personal_formula\nforeign key"];
+  PersonalFormulaIngredient -> Herb [label="herb\nforeign key"];
+}

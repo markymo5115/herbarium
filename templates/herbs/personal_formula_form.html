@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }}{% endblock %}
+
+{% block content %}
+<section class="detail wide-detail">
+  <a class="back-link" href="{% url 'personal-formula-list' %}">Back to my formulas</a>
+  <h1>{{ title }}</h1>
+  <form method="post" class="stacked-form">
+    {% csrf_token %}
+    {{ form.non_field_errors }}
+    <div class="form-grid">
+      {% for field in form %}
+        <label {% if field.name == "notes" %}class="full-width"{% endif %}>
+          <span>{{ field.label }}</span>
+          {{ field }}
+          {% if field.help_text %}<small class="help-text">{{ field.help_text }}</small>{% endif %}
+          {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+        </label>
+      {% endfor %}
+    </div>
+
+    <section>
+      <h2>Ingredients</h2>
+      <p class="intro">Link ingredients to database herbs where possible so the site can calculate formula qualities and suggest local alternatives.</p>
+      {{ formset.management_form }}
+      {{ formset.non_form_errors }}
+      <div class="ingredient-formset" id="ingredient-formset">
+        {% for ingredient_form in formset %}
+          <div class="ingredient-form-row">
+            {% for hidden in ingredient_form.hidden_fields %}
+              {{ hidden }}
+            {% endfor %}
+            {% for field in ingredient_form.visible_fields %}
+              {% if field.name == "DELETE" %}
+                <label class="delete-field">
+                  {{ field }}
+                  <span>{{ field.label }}</span>
+                  {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+                </label>
+              {% else %}
+                <label {% if field.name == "notes" %}class="wide-field"{% endif %}>
+                  <span>{{ field.label }}</span>
+                  {{ field }}
+                  {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+                </label>
+              {% endif %}
+            {% endfor %}
+            {{ ingredient_form.non_field_errors }}
+          </div>
+        {% endfor %}
+      </div>
+      <template id="empty-ingredient-form">
+        <div class="ingredient-form-row">
+          {% for hidden in formset.empty_form.hidden_fields %}
+            {{ hidden }}
+          {% endfor %}
+          {% for field in formset.empty_form.visible_fields %}
+            {% if field.name == "DELETE" %}
+              <label class="delete-field">
+                {{ field }}
+                <span>{{ field.label }}</span>
+                {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+              </label>
+            {% else %}
+              <label {% if field.name == "notes" %}class="wide-field"{% endif %}>
+                <span>{{ field.label }}</span>
+                {{ field }}
+                {% if field.errors %}<small class="field-errors">{{ field.errors|join:", " }}</small>{% endif %}
+              </label>
+            {% endif %}
+          {% endfor %}
+          {{ formset.empty_form.non_field_errors }}
+        </div>
+      </template>
+      <button type="button" class="button-link secondary add-ingredient-button" id="add-ingredient">Add ingredient</button>
+    </section>
+
+    <div class="form-actions">
+      <button type="submit">Save formula</button>
+      {% if formula %}
+        <a class="button-link secondary" href="{{ formula.get_absolute_url }}">Cancel</a>
+      {% else %}
+        <a class="button-link secondary" href="{% url 'personal-formula-list' %}">Cancel</a>
+      {% endif %}
+    </div>
+  </form>
+</section>
+<script>
+  (() => {
+    const addButton = document.getElementById("add-ingredient");
+    const formset = document.getElementById("ingredient-formset");
+    const template = document.getElementById("empty-ingredient-form");
+    const totalForms = document.getElementById("id_ingredients-TOTAL_FORMS");
+
+    if (!addButton || !formset || !template || !totalForms) {
+      return;
+    }
+
+    addButton.addEventListener("click", () => {
+      const index = Number.parseInt(totalForms.value, 10);
+      const html = template.innerHTML.replaceAll("__prefix__", index);
+      formset.insertAdjacentHTML("beforeend", html);
+      totalForms.value = index + 1;
+      const addedRow = formset.lastElementChild;
+      const firstInput = addedRow.querySelector("select, input[type='text'], textarea");
+      if (firstInput) {
+        firstInput.focus();
+      }
+    });
+  })();
+</script>
+{% endblock %}

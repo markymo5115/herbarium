@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}{{ formula.pinyin_display|default:formula.pinyin_name }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+  <a class="back-link" href="{% url 'formula-list' %}">Back to formulas</a>
+  <p class="eyebrow">{{ formula.category|default:"Formula" }}</p>
+  <h1>{{ formula.traditional_chinese_name|default:formula.name }}{% if formula.simplified_chinese_name and formula.simplified_chinese_name != formula.traditional_chinese_name %} ({{ formula.simplified_chinese_name }}){% endif %}</h1>
+  <p class="pinyin large">{{ formula.pinyin_display|default:formula.pinyin_name }}</p>
+  <p class="subtitle">{{ formula.english_translation|default:formula.name }}</p>
+
+  <section>
+    <h2>Traditionally associated with</h2>
+    <div class="tags large">
+      {% for ailment in formula.ailments.all %}
+        <span>{{ ailment.name }}</span>
+      {% empty %}
+        <span>No ailments recorded</span>
+      {% endfor %}
+    </div>
+    <p>{{ formula.traditional_uses }}</p>
+  </section>
+
+  <section>
+    <h2>Ingredients</h2>
+    <div class="ingredient-list">
+      {% for ingredient in formula.ingredients.all %}
+        <div>
+          <a href="{{ ingredient.herb.get_absolute_url }}">{{ ingredient.herb.traditional_chinese_name|default:ingredient.herb.english_name }}{% if ingredient.herb.simplified_chinese_name and ingredient.herb.simplified_chinese_name != ingredient.herb.traditional_chinese_name %} ({{ ingredient.herb.simplified_chinese_name }}){% endif %}</a>
+          <span>{{ ingredient.herb.pinyin_display|default:ingredient.herb.pinyin_name }}</span>
+          {% if ingredient.role %}<small>{{ ingredient.role }}</small>{% endif %}
+        </div>
+      {% empty %}
+        <p>No ingredients recorded.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  {% if formula.preparation_notes %}
+    <section>
+      <h2>Preparation notes</h2>
+      <p>{{ formula.preparation_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if formula.cautions %}
+    <section class="safety">
+      <h2>Cautions</h2>
+      <p>{{ formula.cautions }}</p>
+    </section>
+  {% endif %}
+
+  {% if formula.source_note %}
+    <section>
+      <h2>Source note</h2>
+      <p>{{ formula.source_note }}</p>
+    </section>
+  {% endif %}
+</article>
+{% endblock %}

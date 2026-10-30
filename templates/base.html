@@ -1,0 +1,40 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}Chinese Herbarium{% endblock %}</title>
+  <link rel="stylesheet" href="{% static 'css/site.css' %}">
+</head>
+<body>
+  <header class="site-header">
+    <a class="brand" href="{% url 'herb-list' %}">Chinese Herbarium</a>
+    <nav class="site-nav" aria-label="Main">
+      <a href="{% url 'herb-list' %}">Herbs</a>
+      <a href="{% url 'local-plant-list' %}">Local plants</a>
+      <a href="{% url 'british-herbalist-plant-list' %}">British herbalist plants</a>
+      <a href="{% url 'food-list' %}">Foods</a>
+      <a href="{% url 'food-recipe-list' %}">Recipes</a>
+      <a href="{% url 'formula-list' %}">Formulas</a>
+      {% if user.is_authenticated %}
+        <a href="{% url 'personal-formula-list' %}">My formulas</a>
+        <form method="post" action="{% url 'logout' %}" class="logout-form">
+          {% csrf_token %}
+          <button type="submit" class="link-button">Log out</button>
+        </form>
+      {% else %}
+        <a href="{% url 'login' %}">Log in</a>
+        <a href="{% url 'signup' %}">Sign up</a>
+      {% endif %}
+      <a href="/admin/">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <section class="notice" role="note">
+      Educational database only. Herb uses are described as traditional Chinese medicine indications, not medical advice, diagnosis, or treatment. Consult a qualified clinician before using herbs.
+    </section>
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}{{ recipe.name }}{% endblock %}
+
+{% block content %}
+<article class="detail">
+  <a class="back-link" href="{% url 'food-recipe-list' %}">Back to recipes</a>
+  <p class="eyebrow">{{ recipe.category|default:"Food therapy" }}</p>
+  <h1>{{ recipe.name }}</h1>
+  {% if recipe.chinese_name %}
+    <p class="pinyin large">{{ recipe.chinese_name }}</p>
+  {% endif %}
+  <p class="subtitle">{{ recipe.get_nature_display|default:"Nature not recorded" }}{% if recipe.flavors %} · {{ recipe.flavors }}{% endif %}</p>
+
+  <dl class="facts">
+    <div><dt>Nature</dt><dd>{{ recipe.get_nature_display|default:"Not recorded" }}</dd></div>
+    <div><dt>Flavours</dt><dd>{{ recipe.flavors|default:"Not recorded" }}</dd></div>
+    <div><dt>Networks</dt><dd>{{ recipe.meridians|default:"Not recorded" }}</dd></div>
+    <div><dt>Category</dt><dd>{{ recipe.category|default:"Food therapy" }}</dd></div>
+  </dl>
+
+  <section>
+    <h2>Food therapy pattern</h2>
+    <div class="tags large">
+      {% for ailment in recipe.ailments.all %}
+        <span>{{ ailment.name }}</span>
+      {% empty %}
+        <span>No tags recorded</span>
+      {% endfor %}
+    </div>
+    <p>{{ recipe.traditional_uses }}</p>
+  </section>
+
+  <section>
+    <h2>Ingredients</h2>
+    <div class="ingredient-list">
+      {% for ingredient in recipe.recipe_ingredients.all %}
+        <div>
+          {% if ingredient.herb %}
+            <a href="{{ ingredient.herb.get_absolute_url }}">{{ ingredient.herb.english_name }}</a>
+          {% else %}
+            <strong>{{ ingredient.name }}</strong>
+          {% endif %}
+          {% if ingredient.amount %}
+            <span>{{ ingredient.amount }}</span>
+          {% elif ingredient.herb %}
+            <span>{{ ingredient.herb.get_item_type_display }}</span>
+          {% endif %}
+          <small class="ingredient-importance {{ ingredient.tcm_importance }}">{{ ingredient.get_tcm_importance_display }}</small>
+          {% if ingredient.role %}<small>{{ ingredient.role }}</small>{% endif %}
+          {% if ingredient.herb and ingredient.tcm_importance != "culinary" and ingredient.tcm_importance != "unclassified" %}
+            <small>{{ ingredient.herb.get_nature_display|default:"Nature not recorded" }}{% if ingredient.herb.flavors %} · {{ ingredient.herb.flavors }}{% endif %}{% if ingredient.herb.meridians %} · {{ ingredient.herb.meridians }}{% endif %}</small>
+          {% endif %}
+          {% if ingredient.notes %}<small>{{ ingredient.notes }}</small>{% endif %}
+        </div>
+      {% empty %}
+        <p>No ingredients recorded.</p>
+      {% endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h2>Method</h2>
+    <ol class="method-list">
+      {% for step in recipe.steps.all %}
+        <li>{{ step.instruction }}</li>
+      {% empty %}
+        <li>{{ recipe.preparation_notes|default:"No method recorded." }}</li>
+      {% endfor %}
+    </ol>
+  </section>
+
+  <section>
+    <h2>Recipe profile</h2>
+    <p>{{ profile.summary }}</p>
+    <div class="profile-grid">
+      <div>
+        <h3>Categories</h3>
+        <div class="tags">
+          {% for name, count in profile.categories %}
+            <span>{{ name }} · {{ count }}</span>
+          {% empty %}
+            <span>No category data</span>
+          {% endfor %}
+        </div>
+      </div>
+      <div>
+        <h3>Organ networks</h3>
+        <div class="tags">
+          {% for name, count in profile.meridians %}
+            <span>{{ name }} · {{ count }}</span>
+          {% empty %}
+            <span>No network data</span>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </section>
+
+  {% if recipe.preparation_notes %}
+    <section>
+      <h2>Preparation notes</h2>
+      <p>{{ recipe.preparation_notes }}</p>
+    </section>
+  {% endif %}
+
+  {% if recipe.cautions %}
+    <section class="safety">
+      <h2>Cautions</h2>
+      <p>{{ recipe.cautions }}</p>
+    </section>
+  {% endif %}
+
+  {% if recipe.source_note %}
+    <section>
+      <h2>Source note</h2>
+      <p>{{ recipe.source_note }}</p>
+    </section>
+  {% endif %}
+</article>
+{% endblock %}
