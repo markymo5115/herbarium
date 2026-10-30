@@ -1,11 +1,40 @@
+import os
 from pathlib import Path
+
+from django.core.exceptions import ImproperlyConfigured
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-SECRET_KEY = "dev-only-change-me"
-DEBUG = True
-ALLOWED_HOSTS = ["127.0.0.1", "localhost"]
+
+def env_flag(name, default=False):
+    """Read a boolean from the environment, accepting 1/true/yes/on."""
+    value = os.environ.get(name)
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on"}
+
+
+def env_list(name, default):
+    """Read a comma-separated list from the environment."""
+    raw = os.environ.get(name) or default
+    return [item.strip() for item in raw.split(",") if item.strip()]
+
+
+DEBUG = env_flag("DJANGO_DEBUG", default=True)
+
+SECRET_KEY = os.environ.get("DJANGO_SECRET_KEY")
+if not SECRET_KEY:
+    if not DEBUG:
+        raise ImproperlyConfigured(
+            "DJANGO_SECRET_KEY must be set when DEBUG is off. Generate one with:\n"
+            "  python -c 'from django.core.management.utils import "
+            "get_random_secret_key as k; print(k())'"
+        )
+    # Local development only. Publicly known, so never serve with this set.
+    SECRET_KEY = "dev-only-change-me"
+
+ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "127.0.0.1,localhost")
 
 INSTALLED_APPS = [
     "django.contrib.admin",
